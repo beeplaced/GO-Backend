@@ -1,0 +1,278 @@
+definitions:
+  main.ChatMessage:
+    properties:
+      request:
+        example: Analyze scenario, List all machinery, Categorize machinery
+        type: string
+    required:
+    - request
+    type: object
+  main.Item:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      id:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Example API with GET, POST, and PATCH endpoints.
+  title: Go Backend API
+  version: "1.0"
+paths:
+  /add:
+    post:
+      consumes:
+      - application/json
+      description: Add a JSON object and store it in the database, returns the generated
+        ID
+      parameters:
+      - description: Item data
+        in: body
+        name: data
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: id of the created item
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid JSON
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to read/write DB
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add a new item
+      tags:
+      - items
+  /chat:
+    post:
+      consumes:
+      - application/json
+      description: Receives a message from UI and returns a JSON response
+      operationId: chat-message
+      parameters:
+      - description: Message JSON
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/main.ChatMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Send a chat message
+  /image/{filename}:
+    get:
+      consumes:
+      - application/json
+      description: Returns an image file as response
+      operationId: get-image
+      parameters:
+      - description: Image filename
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - image/png
+      - ' image/jpeg'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Serve an image
+  /images:
+    get:
+      description: Returns a JSON array of filenames in the uploads folder
+      operationId: list-images
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of image filenames
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all images
+  /item/{id}:
+    get:
+      description: Retrieve a JSON object stored in the database by its ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Item'
+        "404":
+          description: Item not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to read DB
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get an item by ID
+      tags:
+      - items
+  /ping:
+    get:
+      description: Returns pong
+      operationId: ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Ping endpoint
+  /tableData:
+    get:
+      description: Returns table data from JSON file
+      operationId: get-table-data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get table data
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads an image and returns filename, size, and EXIF metadata
+      operationId: upload-image
+      parameters:
+      - description: Image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upload an image
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Creates a user with given data
+      operationId: create-user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new user
+  /user/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update a user by ID
+      operationId: update-user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update user
+swagger: "2.0"
